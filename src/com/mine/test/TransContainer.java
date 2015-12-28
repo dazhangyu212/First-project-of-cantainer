@@ -6,15 +6,18 @@ public class TransContainer {
 	/**
 	 * 行数，同时指代  T：额定堆存高度；
 	 */
-	private static int mRaw = 4;
+//	private static int mRaw = 4;
+	private static int mRaw = 3;
 	/**
 	 * 列数，同时指代 r：一个贝中所包含的栈的数量；
 	 */
-	public static  int mColumn = 6;
+//	public static  int mColumn = 6;
+	public static  int mColumn = 4;
 	/**
 	 * 现有的集装箱数量
 	 */
-	private int mCount = 16;
+//	private int mCount = 16;
+	private int mCount = 10;
 	private int transTimes = 0;
 	/**
 	 * 
@@ -142,7 +145,8 @@ public class TransContainer {
 	 * 初始化栈列数据
 	 */
 	public void initData() {
-		 int[][]	cantainers = {{10,14,4,7,15,12},{6,9,8,16,11,2},{13,5,0,1,0,3},{0,0,0,0,0,0}};
+//		 int[][]	cantainers = {{10,14,4,7,15,12},{6,9,8,16,11,2},{13,5,0,1,0,3},{0,0,0,0,0,0}};
+		int[][]	cantainers = {{10,2,5,6},{9,1,7,3},{0,0,4,8}};
 		 //int[mRaw][mColumn]
 		 mBuilder = new StringBuilder();
 		 mCantainers = cantainers;
@@ -202,7 +206,7 @@ public class TransContainer {
 				int[] group = getMinOrMax(i);
 				if (group[0] > 0 && obstructionNO < group[0]) {
 					int top = isColFull(i);
-					if (top > -1 && top < 3) {
+					if (top > -1 && top < mRaw -1) {
 						
 //						System.out.println("mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
 //								+"转移至mCantainers["+top+"]["+i+"]="+mCantainers[top][i]
@@ -273,14 +277,14 @@ public class TransContainer {
 			int top = minArray[1];
 			int i = minArray[2];
 			mBuilder.append("mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
-					+"转移至mCantainers["+top+"]["+i+"]="+mCantainers[top][i]
-					+"上方mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]+"\n");
-			mCantainers[top+1][i] = mCantainers[x][y];
+					+"转移至mCantainers["+(top-1)+"]["+i+"]="+mCantainers[top-1][i]
+					+"上方mCantainers["+top+"]["+i+"]="+mCantainers[top][i]+"\n");
+			mCantainers[top][i] = mCantainers[x][y];
 			mCantainers[x][y] = 0;
 			Integer[] temp = {x,y,top+1,i};
 			mCase.add(temp);
 			mBuilder.append("now mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
-					+";now mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]+"\n");
+					+";now mCantainers["+(top)+"]["+i+"]="+mCantainers[top][i]+"\n");
 //		System.out.println("now mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
 //				+";now mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]);
 			transTimes++;

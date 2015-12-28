@@ -27,7 +27,17 @@ public class TransContainer {
 	
 	private static ArrayList<Integer[]> mCase = new ArrayList<Integer[]>();
 	
+	public static ArrayList<Integer[]> mPro_1 = new ArrayList<Integer[]>();
+	public static ArrayList<Integer[]> mPro_2 = new ArrayList<Integer[]>();
+	public static ArrayList<Integer[]> mPro_3 = new ArrayList<Integer[]>();
+	public static ArrayList<Integer[]> mPro_4 = new ArrayList<Integer[]>();
+	public static ArrayList<Integer[]> mPro_5 = new ArrayList<Integer[]>();
+	
+	public static boolean toStop = false;
+	
 	private int mCost = 0;
+	
+//	private int m
 	
 	public void initView() {
 		initData();
@@ -48,6 +58,10 @@ public class TransContainer {
 		System.out.println(mBuilder.toString());
 	}
 	
+	private int compareCost(int orgx,int orgy,int desx,int desy){
+		int cost = Math.abs(desy - orgy)+2*(mRaw -1 + 1)-(desx+orgx);
+		return cost;
+	}
 	private void countCost(int orgx,int orgy,int desx,int desy){
 		int cost = Math.abs(desy - orgy)+2*(mRaw -1 + 1)-(desx+orgx);
 		mCostList.add(cost);
@@ -182,6 +196,7 @@ public class TransContainer {
 	 */
 	private void isPrior(int obstructionNO,int x,int y){
 		boolean hasMoved = false;
+		ArrayList<Integer[]> costs = new ArrayList<Integer[]>();
 		for (int i = 0; i < mColumn; i++) {
 			if (i != y) {
 				int[] group = getMinOrMax(i);
@@ -202,31 +217,19 @@ public class TransContainer {
 						if (!mSame) {
 							continue;
 						}else {
-							mBuilder.append("mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
-									+"转移至mCantainers["+top+"]["+i+"]="+mCantainers[top][i]
-									+"上方mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]+"\n");
-							mCantainers[top+1][i] = mCantainers[x][y];
-							mCantainers[x][y] = 0;
-							Integer[] temp = {x,y,top+1,i};
-							mCase.add(temp);
-							mBuilder.append("now mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
-									+";now mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]+"\n");
-//						System.out.println("now mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
-//								+";now mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]);
-							transTimes++;
-							countCost(x, y, top+1, i);
 							
-							mBuilder.append("倒箱第"+transTimes+"次\n");
-//						System.out.println("倒箱第"+transTimes+"次");
-							hasMoved |= true;
-							return;
+							int tempcost = compareCost(x, y, top+1, i); 
+							Integer[] tempArray= {tempcost,top+1,i};
+							costs.add(tempArray);
+//							return;
 						}
 					}else {
 //						continue;
 						mBuilder.append("列"+i+"满栈;top = "+top+"\n");
 //						System.out.println("列"+i+"满栈;top = "+top);
 					}
-				}else if(group[0]==0 && group[1] == 0 ){
+				}
+				else if(group[0]==0 && group[1] == 0 ){
 					//这一步雷同条件3 isColEmpty
 					mBuilder.append("阻塞箱转移至空列\n");
 					mBuilder.append("mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
@@ -249,11 +252,43 @@ public class TransContainer {
 //					System.out.println("obstructionNO > group[0]:"+obstructionNO+">"+group[0]);
 					hasMoved |= true;
 					return;
-				}else {
+				}
+				else {
 					mBuilder.append("obstructionNO > group[0]:"+obstructionNO+">"+group[0]+"\n");
 //					System.out.println("obstructionNO > group[0]:"+obstructionNO+">"+group[0]);
 				}
 			}
+		}
+		if (costs.size() > 0) {
+			
+			Integer[] minArray = costs.get(0);
+			int min = minArray[0];
+			for (int j = 0; j < costs.size(); j++) {
+				Integer[] arr = costs.get(j);
+				if (min>arr[0]) {
+					min = arr[0];
+					minArray = arr;
+				}
+			}
+			int top = minArray[1];
+			int i = minArray[2];
+			mBuilder.append("mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
+					+"转移至mCantainers["+top+"]["+i+"]="+mCantainers[top][i]
+					+"上方mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]+"\n");
+			mCantainers[top+1][i] = mCantainers[x][y];
+			mCantainers[x][y] = 0;
+			Integer[] temp = {x,y,top+1,i};
+			mCase.add(temp);
+			mBuilder.append("now mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
+					+";now mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]+"\n");
+//		System.out.println("now mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
+//				+";now mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]);
+			transTimes++;
+			countCost(x, y, top+1, i);
+			mBuilder.append("倒箱第"+transTimes+"次\n"+"====选择了代价最小的"
+					+ "====\n");
+//			System.out.println("倒箱第"+transTimes+"次");
+				hasMoved |= true;
 		}
 		/**
 		 * 如果循环完成,阻塞箱却未被移除,则执行条件3
@@ -300,13 +335,49 @@ public class TransContainer {
 	 * @return -1 所有列都不为空栈；0~n 空栈列序号
 	 */
 	private int isColEmpty(int obs,int x ,int y){
+		boolean hasMoved = false;
+		ArrayList<Integer[]> costs = new ArrayList<Integer[]>();
 		for (int i = 0; i < mColumn; i++) {
 			if (i!= y && mCantainers[0][i] == 0) {
-				return i;
+				int tempcost = compareCost(x, y, 0, i); 
+				Integer[] tempArray= {tempcost,0,i};
+				costs.add(tempArray);
 			}else {
 				
 			}
 		} 
+		if (costs.size() > 0) {
+			
+			Integer[] minArray = costs.get(0);
+			int min = minArray[0];
+			for (int j = 0; j < costs.size(); j++) {
+				Integer[] arr = costs.get(j);
+				if (min>arr[0]) {
+					min = arr[0];
+					minArray = arr;
+				}
+			}
+			int top = minArray[1];
+			int i = minArray[2];
+//			mBuilder.append("mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
+//					+"转移至mCantainers["+top+"]["+i+"]="+mCantainers[top][i]
+//					+"上方mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]+"\n");
+//			mCantainers[top+1][i] = mCantainers[x][y];
+//			mCantainers[x][y] = 0;
+//			Integer[] temp = {x,y,top+1,i};
+//			mCase.add(temp);
+//			mBuilder.append("now mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
+//					+";now mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]+"\n");
+////		System.out.println("now mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
+////				+";now mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]);
+//			transTimes++;
+//			countCost(x, y, top+1, i);
+//			mBuilder.append("倒箱第"+transTimes+"次\n"+"====选择了代价最小的"
+//					+ "====\n");
+////			System.out.println("倒箱第"+transTimes+"次");
+//				hasMoved |= true;
+			return i;
+		}
 		return -1;
 	}
 	
@@ -424,12 +495,14 @@ public class TransContainer {
 	 * 检测所有可能性
 	 * 判断阻塞箱的序号优先级是否高于某一栈内的所有集装箱
 	 * 2）若阻塞箱的优先级高于候选栈内所有集装箱的优先级，则优选此栈；
+	 * 
 	 * @param obstructionNO 阻塞箱的序号
 	 * @param x 阻塞箱所在行
 	 * @param y 阻塞箱所在列 与目标集装箱同列
 	 */
-	public void isPriorOthers(int obstructionNO,int x,int y){
+	public int isPriorOthers(int obstructionNO,int x,int y){
 		int chances = 0;
+		ArrayList<Integer> costs = new ArrayList<Integer>();
 		for (int i = 0; i < mColumn; i++) {
 			if (i != y) {
 				int[] group = getMinOrMax(i);
@@ -441,6 +514,8 @@ public class TransContainer {
 								+"转移至mCantainers["+top+"]["+i+"]="+mCantainers[top][i]
 								+"上方mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]
 								+"第"+chances+"种可能===\n");
+						int price = compareCost(x, y, top+1, i); 
+						costs.add(price);
 //						System.out.println("===mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
 //								+"转移至mCantainers["+top+"]["+i+"]="+mCantainers[top][i]
 //								+"上方mCantainers["+(top+1)+"]["+i+"]="+mCantainers[top+1][i]
@@ -480,9 +555,22 @@ public class TransContainer {
 //					System.out.println("===obstructionNO > group[0]:"+obstructionNO+">"+group[0]+"===");
 				}
 			}
+				
+		}
+		if (costs.size() >0) {
+			
+			int min = costs.get(0);
+			for (int j = 0; j < costs.size(); j++) {
+				if (min > costs.get(j)) {
+					min = costs.get(j);
+					
+				}
+			}
+			System.out.println("最小代价"+min);
 		}
 		mBuilder.append("===符合条件2共"+chances+"种可能性===\n");
 //		System.out.println("===符合条件2共"+chances+"种可能性===");
+		return chances;
 	}
 	
 	/**

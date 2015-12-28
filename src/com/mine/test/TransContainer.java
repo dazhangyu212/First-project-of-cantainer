@@ -48,8 +48,8 @@ public class TransContainer {
 		System.out.println(mBuilder.toString());
 	}
 	
-	private void countCost(int orgx,int orgy,int desx,int dexy){
-		int cost = Math.abs(dexy - orgy)+2*(mRaw + 1)-(desx+orgx);
+	private void countCost(int orgx,int orgy,int desx,int desy){
+		int cost = Math.abs(desx - orgx)+2*(mRaw + 1)-(desy+orgy);
 		mCostList.add(cost);
 	}
 

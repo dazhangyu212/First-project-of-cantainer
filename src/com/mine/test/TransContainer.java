@@ -146,7 +146,10 @@ public class TransContainer {
 	 */
 	public void initData() {
 //		 int[][]	cantainers = {{10,14,4,7,15,12},{6,9,8,16,11,2},{13,5,0,1,0,3},{0,0,0,0,0,0}};
-		int[][]	cantainers = {{10,2,5,6},{9,1,7,3},{0,0,4,8}};
+//		int[][]	cantainers = {{10,2,5,6},{9,1,7,3},{0,0,4,8}};
+		int[][]	cantainers = {{15,8,12,5,3},{16,9,1,14,11},{17,2,10,4,13},{0,7,0,6,0}};
+		mRaw = 4;
+		mColumn = 5;
 		 //int[mRaw][mColumn]
 		 mBuilder = new StringBuilder();
 		 mCantainers = cantainers;
@@ -453,7 +456,7 @@ public class TransContainer {
 		for (int i = 0; i < mColumn; i++) {
 			Integer[] temp = {0,0,0,0};
 			temp[0] = mCantainers[0][i];
-			if (i != x) {
+			if (i != y) {
 				for (int j = 0; j < mRaw; j++) {
 					if (mCantainers[j][i] != 0 && mCantainers[j][i]<temp[0]) {
 						temp[0] = mCantainers[j][i];
@@ -467,15 +470,24 @@ public class TransContainer {
 					}
 				}
 			}
-			array.add(temp);
+			if (temp[3] != 0 && temp[1]+temp[3] < mRaw -1) {
+				array.add(temp);
+			}
 		}
 		Integer[] temp = array.get(0) ;
 		for (int i = 0; i < array.size(); i++) {
-			if (temp[3] > array.get(i)[3]) {
-				temp = array.get(i);
-				System.out.println("条件 5 优先选中的情况array[i] = {"+array.get(i)[0]+","+array.get(i)[1]+","+array.get(i)[2]+","+array.get(i)[3]+"}");
-			}else if(temp[3] == array.get(i)[3]) {
-				//等待条件清晰。暂时无法添加
+			if (temp[3] > 0 && temp[3] < mRaw -1) {
+				Integer[] othertemp = array.get(i);
+				if (temp[3] > othertemp[3]) {
+					temp = othertemp;
+				}else if(temp[3] == othertemp[3]) {
+					//等待条件清晰。暂时无法添加
+					int cost1 = compareCost(x, y, temp[1], temp[2]);
+					int cost2 = compareCost(x, y, othertemp[1], othertemp[2]);
+					if (cost1 > cost2) {
+						temp = othertemp;
+					}
+				}
 			}
 		}
 //		StringBuffer mBuilder = new StringBuffer();
@@ -491,6 +503,7 @@ public class TransContainer {
 				+";now mCantainers["+((temp[1]+temp[3])+1)+"]["+temp[2]+"]="+mCantainers[(temp[1]+temp[3])+1][temp[2]]+"\n");
 //		System.out.println("now mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
 //				+";now mCantainers["+(mX+1)+"]["+i+"]="+mCantainers[mX+1][i]);
+		mBuilder.append("条件 5 优先选中的情况array[i] = {"+temp[0]+","+temp[1]+","+temp[2]+","+temp[3]+"}\n");
 		countCost(x, y, (temp[1]+temp[3])+1, temp[2]);
 //		System.out.println(mBuilder.toString());
 	} 
@@ -512,7 +525,7 @@ public class TransContainer {
 				int[] group = getMinOrMax(i);
 				if (group[0] > 0 && obstructionNO < group[0]) {
 					int top = isColFull(i);
-					if (top > -1 && top < 3) {
+					if (top > -1 && top < mRaw -1) {
 						chances++;
 						mBuilder.append("===mCantainers["+x+"]["+y+"]="+mCantainers[x][y]
 								+"转移至mCantainers["+top+"]["+i+"]="+mCantainers[top][i]

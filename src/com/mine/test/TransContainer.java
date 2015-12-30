@@ -147,9 +147,10 @@ public class TransContainer {
 	public void initData() {
 //		 int[][]	cantainers = {{10,14,4,7,15,12},{6,9,8,16,11,2},{13,5,0,1,0,3},{0,0,0,0,0,0}};
 //		int[][]	cantainers = {{10,2,5,6},{9,1,7,3},{0,0,4,8}};
-		int[][]	cantainers = {{15,8,12,5,3},{16,9,1,14,11},{17,2,10,4,13},{0,7,0,6,0}};
-		mRaw = 4;
-		mColumn = 5;
+//		int[][]	cantainers = {{15,8,12,5,3},{16,9,1,14,11},{17,2,10,4,13},{0,7,0,6,0}};
+		int[][]	cantainers = {{6,1,4},{7,5,2},{3,0,0}};
+		mRaw = cantainers.length;
+		mColumn = cantainers[0].length;
 		 //int[mRaw][mColumn]
 		 mBuilder = new StringBuilder();
 		 mCantainers = cantainers;
